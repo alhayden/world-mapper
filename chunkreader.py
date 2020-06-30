@@ -1,5 +1,7 @@
 import struct
+from functools import lru_cache
 
+@lru_cache
 def longs_to_int(data):
     # pad = '0' * datumLength
     # return bin(int(''.join([(pad + bin(d)[2:])[-datumLength:] for d in data]), 2))
@@ -11,6 +13,8 @@ def longs_to_int(data):
 
 
 def get_blockstate_at(chunk, x, y, z):
+    x %= 16
+    z %= 16
     if 1451 <= chunk['DataVersion'] < 2529: # the flattening - right before they changed the format again
         return get_blockstate_at_115(chunk['Level'], x, y, z)
     elif 2529 <= chunk['DataVersion']: # new new new
@@ -49,8 +53,6 @@ def get_blockstate_at_116(chunk, x, y, z):
     which_long_number = i // things_per_long
     the_bits_we_want = sub_chunk['BlockStates'][which_long_number] >> ((i % things_per_long) * delta) # haha you thought we would be readable
     only_the_bits_we_want = the_bits_we_want & ((1<<delta)-1)
-    if y == 49:
-        print(f'{len(sub_chunk["Palette"])=}, {x=} {y=} {z=}')
     the_block_state_dictionary = sub_chunk['Palette'][only_the_bits_we_want]
     return the_block_state_dictionary
 

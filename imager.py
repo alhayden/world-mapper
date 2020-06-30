@@ -1,11 +1,15 @@
 from chunkreader import decode_h_map, get_blockstate_at
+from os import listdir
 import math
 import json
 
 BG_COLOR = (0xD6, 0xBE, 0x96)
 
 color_list = json.loads(open('color_palette.json','r').read())['colors']
-color_map = json.loads(open('palette.json', 'r').read())
+color_map = {}
+for path in listdir('palettes'):
+    if path.endswith('.json'):
+        color_map.update(json.loads(open('palettes/' + path, 'r').read()))
 
 
 def make_image(chunks, size, origin, mode='minecraft', status='     '):
