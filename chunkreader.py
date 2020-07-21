@@ -20,10 +20,22 @@ def get_blockstate_at(chunk, x, y, z):
     elif 2529 <= chunk['DataVersion']: # new new new
         return get_blockstate_at_116(chunk['Level'], x, y, z)
     else:
-        # print("AAAAAAA")
-        # raise RuntimeError("ur too old lol")
-        return {'Name': 'minecraft:air'}
+        return get_blockstate_at_112(chunk['Level'], x, y, z)
 
+def get_blockstate_at_112(chunk, x, y, z):
+    for sub_chunk in chunk['Sections']:
+        if sub_chunk['Y'] * 16 <= y < (sub_chunk['Y'] + 1) * 16 and 'Blocks' in sub_chunk:
+            break
+    else:
+        return {'ID': 0, "Data": 0}
+    i = x + z *16 + (y % 16) * 256
+    blockID = sub_chunk['Blocks'][i]
+    data = sub_chunk['Data'][i // 2]
+    if i % 2 == 1:
+        data = data >> 4
+    else:
+        data = data & 0xF
+    return {'ID': blockID, 'Data': data}
 
 def get_blockstate_at_115(chunk, x, y, z):
     # Find correct subchunk
