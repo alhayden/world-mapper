@@ -76,7 +76,21 @@ def decode_h_map(chunk, map_name):
     elif 2529 <= chunk['DataVersion']: # new new new
         return decode_h_map_116(chunk['Level'], map_name)
     else:
-        return [[255 for z in range(16)] for x in range(16)]
+        return decode_h_map_112(chunk['Level'], map_name)
+
+    return [[255 for z in range(16)] for x in range(16)]
+
+def decode_h_map_112(chunk, map_name):
+    heights = [[255 for z in range(16)] for x in range(16)]
+    for i in range(256):
+        heights[i % 16][i // 16] = chunk['HeightMap'][i] - 1    # default map
+    if map_name == 'OCEAN_FLOOR':
+        for x in range(16):
+            for z in range(16):
+                while get_blockstate_at({'Level': chunk, 'DataVersion': 0}, x, heights[x][z], z)['ID'] in (8, 9):
+                    heights[x][z] -= 1
+
+    return heights
 
 def decode_h_map_115(chunk, map_name):
     heights = [[255 for z in range(16)] for x in range(16)]

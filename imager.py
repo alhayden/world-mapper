@@ -35,7 +35,7 @@ def make_image(chunks, size, origin, mode='minecraft', status='     '):
                 continue
             if base_x > origin[0] + size[0] or base_z > origin[1] + size[1]:
                 continue
-            if 'Heightmaps' not in chunk or 'WORLD_SURFACE' not in chunk['Heightmaps'] or 'Sections' not in chunk:
+            if 'Sections' not in chunk:
                 continue
             if mode[:2] == 'y=':
                 heights = [[y for z in range(16)] for x in range(16)]
