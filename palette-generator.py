@@ -37,7 +37,7 @@ def main():
 
             json_dump[str(matching_block)] = colorID
 
-    with open(f"palettes/palette.json", "w") as f:
+    with open(f"palettes/palette-{world_dir.split('/')[-1]}.json", "w") as f:
         f.write(json.dumps(json_dump))
 
 if __name__ == '__main__':
