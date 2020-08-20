@@ -59,10 +59,11 @@ def main():
 
             orig_x = max(args.min_x, r_x)
             orig_z = max(args.min_z, r_z)
-            for a in range(len(image_chunk[0])):
-                for b in range(len(image_chunk)):
-                    # image[orig_z + b - args.min_z][orig_x + a - args.min_x] = image_chunk[b][a];
-                    image.putpixel((orig_x + a - args.min_x, orig_z + b - args.min_z), image_chunk[b][a])
+            if len(image_chunk) > 0:
+                for a in range(len(image_chunk[0])):
+                    for b in range(len(image_chunk)):
+                        # image[orig_z + b - args.min_z][orig_x + a - args.min_x] = image_chunk[b][a];
+                        image.putpixel((orig_x + a - args.min_x, orig_z + b - args.min_z), image_chunk[b][a])
 #    print(image)
     image.save(args.output_file)
     # with open(args.output_file, "w") as f:
