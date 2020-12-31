@@ -41,8 +41,11 @@ def make_image(chunks, size, origin, mode='minecraft', status='     '):
                 heights = [[y for z in range(16)] for x in range(16)]
                 ocean_heights = [[y for z in range(16)] for x in range(16)]
             else:
-                heights = decode_h_map({'Level': chunk, 'DataVersion':chunk['DataVersion']}, 'WORLD_SURFACE')
-                ocean_heights = decode_h_map({'Level': chunk, 'DataVersion':chunk['DataVersion']}, 'OCEAN_FLOOR')
+                try:
+                    heights = decode_h_map({'Level': chunk, 'DataVersion':chunk['DataVersion']}, 'WORLD_SURFACE')
+                    ocean_heights = decode_h_map({'Level': chunk, 'DataVersion':chunk['DataVersion']}, 'OCEAN_FLOOR')
+                except:
+                    continue
             if mode == 'minecraft' or mode[:2] == 'y=':
                 #blocks = make_block_map(chunk)
                 pass
