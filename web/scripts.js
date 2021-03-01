@@ -8,8 +8,8 @@ map.src = query["m"];
 map.onload = loaded;
 map.onerror = loadfail;
 
-let map_scale_factor = 1.1;
-let map_scale = 0;
+let scroll_map_scale_factor = 1.1;
+let map_scale = 1;
 let map_pos_x = 0;
 let map_pos_y = 0;
 
@@ -112,7 +112,7 @@ function parse_query_string(query) {
 
 function resetView() {
     // move map to default scale and location
-    map_scale = 0;
+    map_scale = 1;
     if (query['s'] != null) map_scale = Number(query['s']);
     map_pos_x = (canvas.width / 2) - (map.width / 2);
     if (query['x'] != null) map_pos_x = (canvas.width / 2) + Number(query['x']);
@@ -123,9 +123,9 @@ function resetView() {
 
 function drawmap() {
     //paint the map on the canvas
-    let scale = Math.pow(map_scale_factor, map_scale)
+    //let scale = Math.pow(map_scale_factor, map_scale)
     context.clearRect(0, 0, canvas.width, canvas.height)
-    context.drawImage(map, map_pos_x, map_pos_y, map.width * scale, map.height * scale)
+    context.drawImage(map, map_pos_x, map_pos_y, map.width * map_scale, map.height * map_scale);
     let w  = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 }
 
@@ -146,32 +146,25 @@ function getShareableLink() {
 }
 
 function translationInput(x, y, move) {
-        if(move){
-            map_pos_x += x - mouse_origin_x;
-            map_pos_y += y - mouse_origin_y;
-            drawmap();
-        }
-        mouse_origin_x = x;
-        mouse_origin_y = y;
+    if(move){
+        map_pos_x += x - mouse_origin_x;
+        map_pos_y += y - mouse_origin_y;
+        drawmap();
+    }
+    mouse_origin_x = x;
+    mouse_origin_y = y;
 }
 
-function scaleInput(x, y, out) {
-        // zoom in and out
-        let rel_pos_x = map_pos_x - x
-        let rel_pos_y = map_pos_y - y
-        if (out) {
-            map_scale++;
-            rel_pos_x *= map_scale_factor;
-            rel_pos_y *= map_scale_factor;
-        }
-        else {
-            map_scale--;
-            rel_pos_x /= map_scale_factor;
-            rel_pos_y /= map_scale_factor;
-        }
-        map_pos_x = rel_pos_x + x
-        map_pos_y = rel_pos_y + y
-        drawmap();
+function scaleInput(x, y, factor) {
+    // zoom in and out
+    let rel_pos_x = map_pos_x - x
+    let rel_pos_y = map_pos_y - y
+    map_scale *= factor;
+    rel_pos_x *= factor;
+    rel_pos_y *= factor;
+    map_pos_x = rel_pos_x + x
+    map_pos_y = rel_pos_y + y
+    drawmap();
 }
 
 function copyToClipBoardExtraJank(string) {
@@ -199,19 +192,12 @@ function addEventListeners() {
             translationInput(touch.clientX, touch.clientY, true);
         }
         else if (e.touches.length == 2){
-            let threshold = 13.5;
             let new_delta = Math.sqrt(Math.pow(e.touches[1].clientX - e.touches[0].clientX, 2) + Math.pow(e.touches[1].clientY - e.touches[0].clientY, 2))
-            let x = e.touches[0].clientX;//(e.touches[1].clientX + e.touches[0].clientX) / 2;
-            let y = e.touches[0].clientY;//(e.touches[1].clientY + e.touches[0].clientY) / 2;
+            let x = e.touches[0].clientX;
+            let y = e.touches[0].clientY;
             translationInput(x, y, true);
-            if(new_delta - touch_delta < -1 * threshold){
-                scaleInput(x, y, false);
-                touch_delta = new_delta;
-            }
-            else if(new_delta - touch_delta > threshold){
-                scaleInput(x, y, true);
-                touch_delta = new_delta;
-            }
+            scaleInput(x, y, new_delta / touch_delta);
+            touch_delta = new_delta;
         }
     });
 
@@ -233,7 +219,13 @@ function addEventListeners() {
     });
 
     document.getElementById("body").addEventListener('wheel', function(e){
-        scaleInput(mouse_origin_x, mouse_origin_y, e.deltaY < 0);
+        if(e.deltaY < 0){
+            scaleInput(mouse_origin_x, mouse_origin_y, scroll_map_scale_factor);
+        }
+        else {
+            scaleInput(mouse_origin_x, mouse_origin_y, 1/scroll_map_scale_factor);
+
+        }
     });
 
     // reset view when compass rose is clicked
