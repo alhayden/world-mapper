@@ -4,6 +4,7 @@ import math
 import json
 
 BG_COLOR = (0xD6, 0xBE, 0x96)
+MIN_Y = -64
 
 color_list = json.loads(open('color_palette.json','r').read())['colors']
 color_map = {}
@@ -26,8 +27,8 @@ def make_image(chunks, size, origin, mode='minecraft', status='     '):
                 continue
             progress += 1
             print(f" Working on chunk {progress} of ~{(size[0] // 16 + 2) * (size[1] // 16 + 2)}{status}", end='\r')
-            chunk = chunks[chunkX, chunkZ]['Level']
-            chunk['DataVersion'] = chunks[chunkX, chunkZ]['DataVersion']
+            chunk = chunks[chunkX, chunkZ]
+            # chunk['DataVersion'] = chunks[chunkX, chunkZ]['DataVersion']
             base_x = chunk['xPos'] * 16
             base_z = chunk['zPos'] * 16
 
@@ -42,13 +43,14 @@ def make_image(chunks, size, origin, mode='minecraft', status='     '):
                 ocean_heights = [[y for z in range(16)] for x in range(16)]
             else:
                 try:
-                    heights = decode_h_map({'Level': chunk, 'DataVersion':chunk['DataVersion']}, 'WORLD_SURFACE')
-                    ocean_heights = decode_h_map({'Level': chunk, 'DataVersion':chunk['DataVersion']}, 'OCEAN_FLOOR')
+                    heights = decode_h_map(chunk, chunk['DataVersion'], 'WORLD_SURFACE')
+                    ocean_heights = decode_h_map(chunk, chunk['DataVersion'], 'OCEAN_FLOOR')
                 except:
                     continue
             if mode == 'minecraft' or mode[:2] == 'y=':
                 #blocks = make_block_map(chunk)
                 pass
+            #import pdb; pdb.set_trace();
             for i in range(256):
                 x = i % 16
                 z = i // 16
@@ -83,14 +85,14 @@ def make_block_map(chunk):
 
 
 def get_color_from_block(chunk, heights, northern_heights, ocean_heights, x, y, z):
-    mapped_color = color_map.setdefault(str(get_blockstate_at({'Level': chunk, 'DataVersion':chunk['DataVersion']}, x, y, z)), 0)
+    mapped_color = color_map.setdefault(str(get_blockstate_at(chunk, chunk['DataVersion'], x, y, z)), 0)
 
-    while mapped_color == 0 and y >= 0: # scan down through transparent blocks
+    while mapped_color == 0 and y >= MIN_Y: # scan down through transparent blocks
         y -= 1
-        mapped_color = color_map.setdefault(str(get_blockstate_at({'Level': chunk, 'DataVersion':chunk['DataVersion']}, x, y, z)), 0)
+        mapped_color = color_map.setdefault(str(get_blockstate_at(chunk, chunk['DataVersion'], x, y, z)), 0)
         heights[x][z] = y
 
-    if y <= 0:
+    if y <= MIN_Y:
         mapped_color = 11
 
     if mapped_color == 0: # invalid color detected!
@@ -119,7 +121,7 @@ def get_water_color(chunk, heights, ocean_heights, x, y, z):
     depth = y - ocean_heights[x][z]
     if y != heights[x][z]:
         surface_y = y
-        while color_map.setdefault(str(get_blockstate_at({'Level': chunk, 'DataVersion':chunk['DataVersion']}, x, y, z)), 0) in (1, 12):
+        while color_map.setdefault(str(get_blockstate_at(chunk, chunk['DataVersion'], x, y, z)), 0) in (1, 12):
             y -= 1
         depth = surface_y - y
     c = tuple(color_list[12][0:3])

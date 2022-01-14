@@ -33,7 +33,8 @@ def main():
             if (v_x // 16, v_z // 16) not in chunk_dict:
                 chunk_dict.update(chunks.read_mca(f'{world_dir}/region/r.{v_x // 512}.{v_z // 512}.mca'))
                 print(f'loaded region {v_x//512}.{v_z//512}...')
-            matching_block = chunkreader.get_blockstate_at(chunk_dict[v_x // 16, v_z // 16], v_x % 16, Y_VAL, v_z % 16)
+            chunk = chunk_dict[v_x // 16, v_z // 16]
+            matching_block = chunkreader.get_blockstate_at(chunk, chunk['DataVersion'], v_x % 16, Y_VAL, v_z % 16)
 
             json_dump[str(matching_block)] = colorID
 

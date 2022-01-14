@@ -34,7 +34,7 @@ def decode_nbt(nbt, tag_type, data, named=True):
         title_length = struct.unpack('>h', nbt.read(2))[0]
         title = nbt.read(title_length).decode('utf8')
     if tag_type == 1:       # TAG_Byte
-        data[title] = struct.unpack('B', nbt.read(1))[0]
+        data[title] = struct.unpack('b', nbt.read(1))[0]
     elif tag_type == 2:     # TAG_Short
         data[title] = struct.unpack('>h', nbt.read(2))[0]
     elif tag_type == 3:     # TAG_Int

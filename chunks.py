@@ -37,10 +37,20 @@ def read_mca(fname):
             NBTparser.decode_nbt(nbt_view, NBTparser.get_type(nbt_view), chunk)
             if '' in chunk:
                 chunk = chunk['']
-            chunks[chunk['Level']['xPos'], chunk['Level']['zPos']] = chunk
-            if chunk['Level']['xPos'] == 0 and chunk['Level']['zPos'] == 2:
-                with open("c.0.2.nbt", 'wb') as tmp_f:
-                    tmp_f.write(raw_nbt)
+            # 1.18 removed the outer 'Level' tag
+            if 'Level' in chunk:
+                chunk['Level']['DataVersion'] = chunk['DataVersion']
+                chunk = chunk['Level']
+            # 1.18 also made the chunk['Sections'] tag become lowercase.
+            if 'sections' in chunk:
+                chunk['Sections'] = chunk['sections']
+                del chunk['sections']
+
+            chunks[chunk['xPos'], chunk['zPos']] = chunk
+            # Debugging: save a single chunk thing
+            # if chunk['Level']['xPos'] == 0 and chunk['Level']['zPos'] == 2:
+            #     with open("c.0.2.nbt", 'wb') as tmp_f:
+            #         tmp_f.write(raw_nbt)
     return chunks
 
 def main():
