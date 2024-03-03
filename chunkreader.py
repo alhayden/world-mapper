@@ -115,12 +115,12 @@ def decode_h_map_115(chunk, map_name):
     return heights
 
 def decode_h_map_116(chunk, map_name):
-    heights = [[255 for z in range(16)] for x in range(16)]
+    heights = [[384 for z in range(16)] for x in range(16)]
 
     delta = 9;
     things_per_long = 64 // delta
     raw_map = chunk['Heightmaps'][map_name]
     for i in range(256):
         which_long = i // things_per_long
-        heights[i % 16][i // 16] = min((raw_map[which_long] >> ((i % things_per_long) * delta)) & 0x1FF, 255)
+        heights[i % 16][i // 16] = min((raw_map[which_long] >> ((i % things_per_long) * delta)) & 0x1FF, 384) - 64
     return heights
